@@ -1,0 +1,127 @@
+{% extends 'lemmatizer_app/base.html' %}
+
+{% block title %}Программа лемматизации ненецких глагольных форм{% endblock %}
+
+{% block content %}
+<main class="page-shell">
+    <section class="hero">
+        <div class="hero__copy">
+            <p class="hero__eyebrow">Программа</p>
+            <h1>Лемматизация ненецких глагольных форм</h1>
+            <p class="hero__lead">Программа с веб-интерфейсом и API для приведения ненецких глагольных словоформ к предполагаемой лемме на основе суффиксных правил.</p>
+            <div class="hero__actions">
+                <a href="#lemmatizer-form" class="button button--primary">Проверить форму</a>
+            </div>
+        </div>
+        <div class="hero__demo" aria-hidden="true">
+            <div class="hero-card hero-card--query">
+                <span class="hero-card__label">Примеры форм</span>
+                <ul class="hero-card__list">
+                    <li>тарпыдинзь</li>
+                    <li>тарпыдась</li>
+                    <li>тарпывась</li>
+                </ul>
+            </div>
+            <div class="hero-card hero-card--result">
+                <span class="hero-card__label">Результат</span>
+                <strong>тарпы</strong>
+                <span>Одна лемма для нескольких распознанных словоформ.</span>
+            </div>
+            <div class="hero-card hero-card--note">
+                <span class="hero-card__label">Принцип</span>
+                <span>Поиск суффикса, снятие окончания и восстановление основы.</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-grid">
+        <section class="surface surface--form" id="lemmatizer-form">
+            <div class="section-heading">
+                <div>
+                    <p class="section-heading__eyebrow">Интерфейс</p>
+                    <h2>Проверка форм</h2>
+                </div>
+                <p class="section-heading__note">Введите одну или несколько глагольных форм. Разделители: пробелы и переносы строк.</p>
+            </div>
+            <form method="get" class="lemmatizer-form" aria-label="Форма лемматизации">
+                {{ form.text }}
+                <div class="form-actions">
+                    <button type="submit" class="button button--primary">Показать леммы</button>
+                    {% if submitted_text %}
+                    <a href="/" class="button button--ghost">Сбросить</a>
+                    {% endif %}
+                </div>
+                <div class="example-block">
+                    <p class="section-heading__eyebrow">Примеры ввода</p>
+                    <div class="example-list">
+                        {% for sample_form in sample_forms %}
+                        <a href="/?text={{ sample_form|urlencode }}" class="example-chip">{{ sample_form }}</a>
+                        {% endfor %}
+                        <a href="/?text={{ sample_text|urlencode }}" class="example-chip example-chip--batch">Набор примеров</a>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <aside class="surface surface--sidebar">
+            <div class="sidebar-stack">
+                <div class="sidebar-card">
+                    <p class="sidebar-card__eyebrow">Что делает программа</p>
+                    <p>Нормализует ввод, ищет совпадающий суффикс и восстанавливает основу предполагаемой леммы.</p>
+                </div>
+                <div class="sidebar-card">
+                    <p class="sidebar-card__eyebrow">Формы для проверки</p>
+                    <p>тарпыдинзь, тарпыдась, тарпывась, тарпыми’, тарпыра’, тарпыдо’.</p>
+                </div>
+                <div class="sidebar-card">
+                    <p class="sidebar-card__eyebrow">Ограничения</p>
+                    <p>Лемматизатор эвристический и рассчитан только на глагольные формы. Возможны неоднозначности и ложные срабатывания.</p>
+                </div>
+                <div class="sidebar-card" id="api-block">
+                    <p class="sidebar-card__eyebrow">HTTP API</p>
+                    <code>GET /api/lemmatize/?text=тарпыдинзь</code>
+                </div>
+            </div>
+        </aside>
+    </section>
+
+    {% if submitted_text %}
+    <section class="surface surface--results">
+        <div class="section-heading">
+            <div>
+                <p class="section-heading__eyebrow">Результаты</p>
+                <h2>Обработано {{ result_count }} форм</h2>
+            </div>
+        </div>
+
+        <div class="results-list">
+            {% for item in results %}
+            <article class="result-card">
+                <div class="result-card__header">
+                    <div>
+                        <p class="result-card__eyebrow">Исходная форма</p>
+                        <h3>{{ item.input }}</h3>
+                    </div>
+                </div>
+                <div class="candidate-list">
+                    {% for candidate in item.candidates %}
+                    <div class="candidate-card">
+                        <div class="candidate-card__title-row">
+                            <strong>{{ candidate.lemma }}</strong>
+                            {% if candidate.suffix %}<span class="candidate-card__suffix">-{{ candidate.suffix }}</span>{% endif %}
+                        </div>
+                        {% if candidate.note %}
+                        <p class="candidate-card__note">{{ candidate.note }}</p>
+                        {% else %}
+                        <p class="candidate-card__meta">{{ candidate.tense_label }} · {{ candidate.number_label }} · лицо {{ candidate.person }} · {{ candidate.suffix_type_label }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</main>
+{% endblock %}

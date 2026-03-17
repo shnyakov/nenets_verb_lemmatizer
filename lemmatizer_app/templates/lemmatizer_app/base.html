@@ -1,0 +1,14 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Ненецкий лемматизатор{% endblock %}</title>
+    <meta name="description" content="Программа для автоматической лемматизации ненецких глагольных форм.">
+    <link rel="stylesheet" href="{% static 'lemmatizer_app/app.css' %}">
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>
